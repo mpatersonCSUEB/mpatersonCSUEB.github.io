@@ -1,12 +1,17 @@
 /* api.js — thin fetch wrapper for the Movie Review API.
    Exposes window.API. All URLs live here; no other file should hardcode /api/*. */
 (function () {
-  const API_BASE = '/api';
+  // When the page is served by Express (same origin as the API), relative paths
+  // work fine.  When the page is served from a dev preview on a different port,
+  // we need the full URL so fetches reach the right server.  Credentials must be
+  // 'include' in that cross-origin case so the session cookie is sent.
+  const SAME_ORIGIN = window.location.port === '3000';
+  const API_BASE = SAME_ORIGIN ? '/api' : 'http://localhost:3000/api';
 
   async function request(path, { method = 'GET', body } = {}) {
     const opts = {
       method,
-      credentials: 'same-origin',
+      credentials: SAME_ORIGIN ? 'same-origin' : 'include',
       headers: {}
     };
     if (body !== undefined) {
