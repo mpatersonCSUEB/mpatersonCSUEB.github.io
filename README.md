@@ -1,4 +1,5 @@
 # CineCritic — Movie Review Website
+![Screenshot of Website](image.png)
 
 A full-stack movie review site where users browse films, submit star ratings and reviews, and discover new movies through community ratings, genre recommendations, and a TMDb-backed search.
 
@@ -108,4 +109,4 @@ All 30 API tests cover auth flows, movie listing, filtering, sorting, review sub
 
 ## Screenshots
 
-_(Add screenshots after first run)_
+![Screenshot of Website](<Screenshot 2026-04-22 090444.png>) ![Screenshot of Website](<Screenshot 2026-04-22 092702.png>) ![alt text](<Screenshot 2026-04-22 092805.png>) ![Screenshot of Website](<Screenshot 2026-04-22 093744.png>)
