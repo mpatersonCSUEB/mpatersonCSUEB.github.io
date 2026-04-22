@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(node seed.js)",
+      "Bash(curl -s http://localhost:3000/api/auth/me)",
+      "Bash(curl -s 'http://localhost:3000/api/movies?sort=rating&order=desc')",
+      "Bash(npm run *)",
+      "Bash(awk '{print $2}')",
+      "Bash(xargs -r kill)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //PID 34596 //F)",
+      "Bash(curl -s \"http://localhost:3000/api/movies/1/recommend\")",
+      "Bash(curl -s \"http://localhost:3000/api/tmdb/search?q=matrix\")",
+      "Bash(curl -s \"http://localhost:3000/api/tmdb/search\")",
+      "Bash(curl -s \"http://localhost:3000/api/tmdb/search?q=test\")",
+      "Bash(curl -s http://localhost:3000/api/movies)",
+      "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\(0,'utf8'\\)\\); console.log\\('count:', d.movies.length\\); console.log\\('missing tmdb_id:', d.movies.filter\\(m=>!m.tmdb_id\\).length\\); console.log\\('missing poster:', d.movies.filter\\(m=>!m.poster_url || !m.poster_url.startsWith\\('https://image.tmdb.org'\\)\\).length\\); console.log\\('sample:', d.movies[0]\\);\")"
+    ]
+  }
+}
