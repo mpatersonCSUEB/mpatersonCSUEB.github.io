@@ -38,6 +38,10 @@
 /* =========================================================================
    Reset / base
    ========================================================================= */
+
+/* Ensure [hidden] always wins over any display: flex/grid from author styles */
+[hidden] { display: none !important; }
+
 *, *::before, *::after { box-sizing: border-box; }
 
 html, body {

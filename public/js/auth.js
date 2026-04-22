@@ -50,7 +50,10 @@
       submit.disabled = true;
       submit.textContent = 'Logging in...';
       try {
-        await API.login({ email, password });
+        const data = await API.login({ email, password });
+        if (data && data.user) {
+          sessionStorage.setItem('cc_user', JSON.stringify(data.user));
+        }
         Toast.show('Welcome back');
         window.location.href = 'index.html';
       } catch (err) {
@@ -89,7 +92,10 @@
       submit.disabled = true;
       submit.textContent = 'Creating...';
       try {
-        await API.register({ username, email, password });
+        const data = await API.register({ username, email, password });
+        if (data && data.user) {
+          sessionStorage.setItem('cc_user', JSON.stringify(data.user));
+        }
         Toast.show('Welcome to CineCritic');
         window.location.href = 'index.html';
       } catch (err) {

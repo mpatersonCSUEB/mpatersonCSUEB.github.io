@@ -7,10 +7,27 @@
 
   function ensureUser() {
     if (userPromise) return userPromise;
-    userPromise = API.getCurrentUser().then(
-      (u) => { cachedUser = u; return u; },
-      () => { cachedUser = null; return null; }
-    );
+    userPromise = API.getCurrentUser()
+      .then((u) => u, () => null)   // treat any network/CORS error as null
+      .then((u) => {
+        if (u) {
+          // API confirmed a live session — keep sessionStorage in sync.
+          sessionStorage.setItem('cc_user', JSON.stringify(u));
+          cachedUser = u;
+          return u;
+        }
+        // API returned null (no cookie / cross-origin session gap).
+        // Fall back to the value stored after the last login/register.
+        try {
+          const stored = sessionStorage.getItem('cc_user');
+          if (stored) {
+            cachedUser = JSON.parse(stored);
+            return cachedUser;
+          }
+        } catch (_) { /* corrupt entry — ignore */ }
+        cachedUser = null;
+        return null;
+      });
     return userPromise;
   }
 
@@ -91,13 +108,12 @@
   async function doLogout() {
     try {
       await API.logout();
-      cachedUser = null;
-      userPromise = null;
-      Toast.show('Logged out');
-      setTimeout(() => { window.location.href = 'index.html'; }, 300);
-    } catch (err) {
-      Toast.show(err.message || 'Could not log out', 'error');
-    }
+    } catch (_) { /* best-effort */ }
+    cachedUser = null;
+    userPromise = null;
+    sessionStorage.removeItem('cc_user');
+    Toast.show('Logged out');
+    setTimeout(() => { window.location.href = 'index.html'; }, 300);
   }
 
   window.Nav = {
