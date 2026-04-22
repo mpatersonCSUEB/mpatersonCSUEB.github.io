@@ -203,6 +203,61 @@ async function main() {
     check('user is null', json && json.user === null, JSON.stringify(json));
   }
 
+  // 12. Recommendations ---------------------------------------------------
+  section('GET /api/movies/1/recommend');
+  {
+    const { status, json } = await api('GET', '/api/movies/1/recommend');
+    check('status is 200', status === 200, JSON.stringify(json).slice(0, 200));
+    check(
+      'returns movies array',
+      json && Array.isArray(json.movies),
+      JSON.stringify(json).slice(0, 200)
+    );
+    check(
+      'at most 5 results',
+      json && Array.isArray(json.movies) && json.movies.length <= 5,
+      `got ${json && json.movies && json.movies.length}`
+    );
+    check(
+      'does not include the seed movie itself',
+      json && Array.isArray(json.movies) && json.movies.every((m) => m.id !== 1),
+      JSON.stringify(json && json.movies && json.movies.map((m) => m.id))
+    );
+  }
+
+  // 13. TMDb search — returns 503 when key not configured -----------------
+  section('GET /api/tmdb/search (no key configured)');
+  {
+    const { status, json } = await api('GET', '/api/tmdb/search?q=matrix');
+    const isUnconfigured = status === 503;
+    const isOk = status === 200;
+    check(
+      'returns 503 (unconfigured) or 200 (configured)',
+      isUnconfigured || isOk,
+      `got ${status} ${JSON.stringify(json)}`
+    );
+    if (isUnconfigured) {
+      check('error message present', json && typeof json.error === 'string');
+    }
+    if (isOk) {
+      check('results array present', json && Array.isArray(json.results));
+    }
+  }
+
+  // 14. TMDb import requires auth -----------------------------------------
+  section('POST /api/tmdb/import/603 (logged out)');
+  {
+    const { status } = await api('POST', '/api/tmdb/import/603');
+    check('status is 401 (auth required)', status === 401, `got ${status}`);
+  }
+
+  // 15. Recommend with bad id ---------------------------------------------
+  section('GET /api/movies/99999/recommend');
+  {
+    const { status, json } = await api('GET', '/api/movies/99999/recommend');
+    check('status is 404', status === 404, JSON.stringify(json));
+  }
+
   // --- Summary ----------------------------------------------------------
   console.log(`\n---\n${passed} passed, ${failed} failed.`);
   process.exit(failed === 0 ? 0 : 1);

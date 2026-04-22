@@ -321,6 +321,136 @@ Increment a review's like count by 1. Requires an authenticated session.
 
 ---
 
+---
+
+## GET /api/movies/:id/recommend
+
+Return up to 5 movies that share at least one genre with the given movie, ranked by average community rating (highest first). If the caller is authenticated, movies they have already reviewed are excluded.
+
+**Auth:** No (but session is used to personalize results when available)
+
+**Path params:**
+- `id` (integer) — movie id
+
+**Example:** `GET /api/movies/1/recommend`
+
+**Response 200:**
+```json
+{
+  "movies": [
+    {
+      "id": 9,
+      "title": "Arrival",
+      "year": 2016,
+      "genre": "Sci-Fi, Drama",
+      "poster_url": "/posters/arrival.jpg",
+      "avg_rating": 4.5,
+      "review_count": 3
+    }
+  ]
+}
+```
+
+**Response 400:**
+```json
+{ "error": "Invalid movie id" }
+```
+
+**Response 404:**
+```json
+{ "error": "Movie not found" }
+```
+
+---
+
+## GET /api/tmdb/search?q=...
+
+Search The Movie Database for movies by title. Annotates each result with whether the movie already exists in the local catalog. Returns `503` when `TMDB_API_KEY` is not set in the environment.
+
+**Auth:** No
+
+**Query params:**
+- `q` (string, required) — search query, max 100 characters
+
+**Example:** `GET /api/tmdb/search?q=inception`
+
+**Response 200:**
+```json
+{
+  "results": [
+    {
+      "tmdb_id": 27205,
+      "title": "Inception",
+      "year": 2010,
+      "poster_url": "https://image.tmdb.org/t/p/w342/...",
+      "overview": "Cobb, a skilled thief...",
+      "already_added": false,
+      "local_id": null
+    }
+  ]
+}
+```
+
+**Response 400:**
+```json
+{ "error": "Query parameter \"q\" is required" }
+```
+
+**Response 503 (TMDB_API_KEY not configured):**
+```json
+{ "error": "TMDb integration is not configured" }
+```
+
+---
+
+## POST /api/tmdb/import/:tmdbId
+
+Fetch movie details from TMDb and insert them into the local catalog. Requires authentication.
+
+**Auth:** Yes
+
+**Path params:**
+- `tmdbId` (integer) — the TMDb movie ID from a search result
+
+**Example:** `POST /api/tmdb/import/27205`
+
+**Response 201:**
+```json
+{
+  "movie": {
+    "id": 14,
+    "title": "Inception",
+    "year": 2010,
+    "genre": "Action, Science Fiction, Adventure",
+    "synopsis": "Cobb, a skilled thief...",
+    "poster_url": "https://image.tmdb.org/t/p/w342/...",
+    "tmdb_id": 27205
+  }
+}
+```
+
+**Response 401:**
+```json
+{ "error": "Authentication required" }
+```
+
+**Response 404:**
+```json
+{ "error": "Movie not found on TMDb" }
+```
+
+**Response 409 (already imported):**
+```json
+{ "error": "Movie already in catalog", "movie": { ... } }
+```
+
+**Response 503 (TMDB_API_KEY not configured):**
+```json
+{ "error": "TMDb integration is not configured" }
+```
+
+---
+
 ## Error reference
 
 | Status | Meaning | Example body |
@@ -330,3 +460,4 @@ Increment a review's like count by 1. Requires an authenticated session.
 | 404 | Resource not found | `{ "error": "Movie not found" }` |
 | 409 | Conflict (e.g. duplicate email/username at registration) | `{ "error": "Email or username already in use" }` |
 | 500 | Unhandled server error | `{ "error": "Internal server error" }` |
+| 503 | External service not configured (TMDb key missing) | `{ "error": "TMDb integration is not configured" }` |
