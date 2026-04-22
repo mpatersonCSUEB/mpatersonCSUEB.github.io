@@ -108,6 +108,57 @@ router.get('/:id', (req, res, next) => {
   }
 });
 
+// GET /api/movies/:id/recommend
+// Returns up to 5 movies that share at least one genre with :id, ranked by avg rating.
+// If a session is active, movies the current user has already reviewed are excluded.
+router.get('/:id/recommend', (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ error: 'Invalid movie id' });
+    }
+
+    const seed = db.prepare('SELECT id, genre FROM movies WHERE id = ?').get(id);
+    if (!seed) {
+      return res.status(404).json({ error: 'Movie not found' });
+    }
+
+    const genres = String(seed.genre || '')
+      .split(',')
+      .map((g) => g.trim())
+      .filter(Boolean);
+
+    if (!genres.length) {
+      return res.json({ movies: [] });
+    }
+
+    // Build a dynamic OR of `m.genre LIKE ?` — one clause per seed genre.
+    const likeClauses = genres.map(() => 'm.genre LIKE ?').join(' OR ');
+    const likeParams = genres.map((g) => '%' + g + '%');
+    const userId = (req.session && req.session.userId) || -1;
+
+    const sql = `
+      SELECT
+        m.id, m.title, m.year, m.genre, m.poster_url,
+        COALESCE(ROUND(AVG(r.rating), 2), 0) AS avg_rating,
+        COUNT(r.id) AS review_count
+      FROM movies m
+      LEFT JOIN reviews r ON r.movie_id = m.id
+      WHERE m.id != ?
+        AND (${likeClauses})
+        AND m.id NOT IN (SELECT movie_id FROM reviews WHERE user_id = ?)
+      GROUP BY m.id
+      ORDER BY avg_rating DESC, review_count DESC, m.title ASC
+      LIMIT 5
+    `;
+
+    const movies = db.prepare(sql).all(id, ...likeParams, userId);
+    res.json({ movies });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // POST /api/movies/:id/reviews  (auth required)
 router.post('/:id/reviews', requireAuth, (req, res, next) => {
   try {

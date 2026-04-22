@@ -12,6 +12,7 @@ const session = require('express-session');
 const authRoutes = require('./routes/auth');
 const movieRoutes = require('./routes/movies');
 const reviewRoutes = require('./routes/reviews');
+const tmdbRoutes = require('./routes/tmdb');
 
 // --- Secrets ---------------------------------------------------------------
 let SESSION_SECRET = process.env.SESSION_SECRET;
@@ -60,6 +61,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/tmdb', tmdbRoutes);
 
 // 404 for unknown /api/* routes (non-API 404s fall through to static handler's 404).
 app.use('/api', (req, res) => {
