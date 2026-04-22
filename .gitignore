@@ -7,3 +7,5 @@ data/*.db-journal
 npm-debug.log*
 .DS_Store
 *.log
+*.db-shm
+*.db-wal

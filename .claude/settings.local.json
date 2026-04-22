@@ -15,7 +15,12 @@
       "Bash(curl -s \"http://localhost:3000/api/tmdb/search\")",
       "Bash(curl -s \"http://localhost:3000/api/tmdb/search?q=test\")",
       "Bash(curl -s http://localhost:3000/api/movies)",
-      "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\(0,'utf8'\\)\\); console.log\\('count:', d.movies.length\\); console.log\\('missing tmdb_id:', d.movies.filter\\(m=>!m.tmdb_id\\).length\\); console.log\\('missing poster:', d.movies.filter\\(m=>!m.poster_url || !m.poster_url.startsWith\\('https://image.tmdb.org'\\)\\).length\\); console.log\\('sample:', d.movies[0]\\);\")"
+      "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\(0,'utf8'\\)\\); console.log\\('count:', d.movies.length\\); console.log\\('missing tmdb_id:', d.movies.filter\\(m=>!m.tmdb_id\\).length\\); console.log\\('missing poster:', d.movies.filter\\(m=>!m.poster_url || !m.poster_url.startsWith\\('https://image.tmdb.org'\\)\\).length\\); console.log\\('sample:', d.movies[0]\\);\")",
+      "Bash(git --no-pager show --stat 0df09a0)",
+      "Bash(git --no-pager show 0df09a0 -- seed.js)",
+      "Bash(git --no-pager diff HEAD -- seed.js)",
+      "Bash(git restore *)",
+      "Bash(git rm *)"
     ]
   }
 }
