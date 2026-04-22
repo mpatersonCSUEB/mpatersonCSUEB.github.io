@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Discover — CineCritic</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="nav-root"></div>
+
+  <main class="page">
+    <header class="discover__header">
+      <h1 class="discover__title">Discover films</h1>
+      <p class="discover__subtitle">Search The Movie Database and add new titles to the catalog.</p>
+    </header>
+
+    <div class="controls" role="region" aria-label="TMDb search">
+      <input
+        id="tmdb-search-input"
+        type="search"
+        class="controls__search"
+        placeholder="Search TMDb by title..."
+        aria-label="Search TMDb"
+        autocomplete="off"
+      />
+    </div>
+
+    <section id="tmdb-status" class="empty" hidden></section>
+
+    <section
+      id="tmdb-results"
+      class="tmdb-list"
+      aria-live="polite"
+      aria-busy="false"
+    ></section>
+  </main>
+
+  <div id="modal-root"></div>
+  <div id="toast-root"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/movie-detail.js"></script>
+  <script src="js/tmdb-search.js"></script>
+</body>
+</html>

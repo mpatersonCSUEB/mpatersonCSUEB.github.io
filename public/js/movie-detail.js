@@ -2,6 +2,7 @@
    Exposes window.MovieDetail.open(id, triggerEl). */
 (function () {
   let currentMovie = null;
+  let currentRecs = [];
   let lastFocus = null;
   let overlay = null;
   let ratingValueEl = null;
@@ -13,12 +14,14 @@
   async function open(id, triggerEl) {
     lastFocus = triggerEl || document.activeElement;
     try {
-      const [data] = await Promise.all([
+      const [data, , recsData] = await Promise.all([
         API.getMovie(id),
-        Nav.ensureUser ? Nav.ensureUser() : Promise.resolve()
+        Nav.ensureUser ? Nav.ensureUser() : Promise.resolve(),
+        API.getRecommendations(id).catch(() => ({ movies: [] }))
       ]);
       currentMovie = data && data.movie;
       if (!currentMovie) throw new Error('Movie not found');
+      currentRecs = (recsData && recsData.movies) || [];
       renderModal();
     } catch (err) {
       Toast.show(err.message || 'Could not load movie', 'error');
@@ -118,6 +121,11 @@
     commSection.appendChild(reviewsListEl);
     renderReviews();
     modal.appendChild(commSection);
+
+    // "You might also like" — only shown when there are results
+    if (currentRecs && currentRecs.length) {
+      modal.appendChild(buildRecommendations());
+    }
 
     overlay.appendChild(modal);
     mount.appendChild(overlay);
@@ -390,6 +398,67 @@
 
     el.appendChild(actions);
     return el;
+  }
+
+  /* ---- Recommendations -------------------------------------------------- */
+  function buildRecommendations() {
+    const section = document.createElement('div');
+    section.className = 'modal__section';
+
+    const heading = document.createElement('h3');
+    heading.className = 'section-heading';
+    heading.textContent = 'You might also like';
+    section.appendChild(heading);
+
+    const strip = document.createElement('div');
+    strip.className = 'recommendations-strip';
+
+    currentRecs.forEach((m) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'rec-card';
+      btn.setAttribute('aria-label', 'Open ' + m.title);
+
+      const posterWrap = document.createElement('div');
+      posterWrap.className = 'rec-card__poster';
+      if (m.poster_url) {
+        const img = document.createElement('img');
+        img.src = m.poster_url;
+        img.alt = m.title + ' poster';
+        img.loading = 'lazy';
+        img.addEventListener('error', () => {
+          posterWrap.innerHTML = '';
+          const ph = document.createElement('div');
+          ph.className = 'poster-placeholder';
+          ph.textContent = '\uD83C\uDFAC';
+          posterWrap.appendChild(ph);
+        }, { once: true });
+        posterWrap.appendChild(img);
+      } else {
+        const ph = document.createElement('div');
+        ph.className = 'poster-placeholder';
+        ph.textContent = '\uD83C\uDFAC';
+        posterWrap.appendChild(ph);
+      }
+      btn.appendChild(posterWrap);
+
+      const title = document.createElement('div');
+      title.className = 'rec-card__title';
+      title.textContent = m.title;
+      btn.appendChild(title);
+
+      const rating = document.createElement('div');
+      rating.className = 'rec-card__rating';
+      const avg = Number(m.avg_rating) || 0;
+      rating.textContent = avg > 0 ? '\u2605 ' + avg.toFixed(1) : 'No ratings yet';
+      btn.appendChild(rating);
+
+      btn.addEventListener('click', () => open(m.id, btn));
+      strip.appendChild(btn);
+    });
+
+    section.appendChild(strip);
+    return section;
   }
 
   window.MovieDetail = { open, close };
