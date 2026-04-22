@@ -1,17 +1,14 @@
 /* api.js — thin fetch wrapper for the Movie Review API.
    Exposes window.API. All URLs live here; no other file should hardcode /api/*. */
 (function () {
-  // When the page is served by Express (same origin as the API), relative paths
-  // work fine.  When the page is served from a dev preview on a different port,
-  // we need the full URL so fetches reach the right server.  Credentials must be
-  // 'include' in that cross-origin case so the session cookie is sent.
-  const SAME_ORIGIN = window.location.port === '3000';
-  const API_BASE = SAME_ORIGIN ? '/api' : 'http://localhost:3000/api';
+  // The frontend is served by the same Express process that hosts the API,
+  // so a plain relative base is always correct.
+  const API_BASE = '/api';
 
   async function request(path, { method = 'GET', body } = {}) {
     const opts = {
       method,
-      credentials: SAME_ORIGIN ? 'same-origin' : 'include',
+      credentials: 'same-origin',
       headers: {}
     };
     if (body !== undefined) {
@@ -104,6 +101,22 @@
     return data && data.user ? data.user : null;
   }
 
+  // ---- Recommendations ----------------------------------------------------
+  function getRecommendations(movieId) {
+    return request('/movies/' + encodeURIComponent(movieId) + '/recommend');
+  }
+
+  // ---- TMDb ---------------------------------------------------------------
+  function searchTmdb(q) {
+    return request('/tmdb/search' + qs({ q }));
+  }
+
+  function importTmdb(tmdbId) {
+    return request('/tmdb/import/' + encodeURIComponent(tmdbId), {
+      method: 'POST'
+    });
+  }
+
   window.API = {
     API_BASE,
     getMovies,
@@ -113,6 +126,9 @@
     register,
     login,
     logout,
-    getCurrentUser
+    getCurrentUser,
+    getRecommendations,
+    searchTmdb,
+    importTmdb
   };
 })();

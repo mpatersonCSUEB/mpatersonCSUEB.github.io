@@ -54,7 +54,7 @@
     right.className = 'nav__links';
 
     const linkHome = makeLink('Home', 'index.html', activeKey === 'home');
-    const linkDiscover = makeLink('Discover', 'index.html#discover', activeKey === 'discover');
+    const linkDiscover = makeLink('Discover', 'search.html', activeKey === 'discover');
     right.appendChild(linkHome);
     right.appendChild(linkDiscover);
 
